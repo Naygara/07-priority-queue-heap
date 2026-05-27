@@ -1,4 +1,4 @@
-package hospital;
+package estatica;
 
 public class FilaPrioridadeHeap<T extends Comparable<T>> {
 
