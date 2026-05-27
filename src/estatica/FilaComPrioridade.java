@@ -1,49 +1,117 @@
-package estatica;
+package hospital;
 
-public class FilaComPrioridade<T> extends FilaEstatica<T> {
+public class FilaPrioridadeHeap<T extends Comparable<T>> {
 
-    public FilaComPrioridade(int capacidade) {
-        super(capacidade);
+    private Object[] heap;
+    private int tamanho;
+    private int capacidade;
+
+    public FilaPrioridadeHeap(int capacidade) {
+        this.capacidade = capacidad;
+        this.heap = new Object[capacidade + 1]; // índice 0 não utilizado
+        this.tamanho = 0;
     }
 
-    @Override
     public void enfileirar(T elemento) {
-        if (estaCheia()) {
-            throw new RuntimeException("A fila está cheia.");
+        if (tamanho >= capacidade) {
+            throw new IllegalStateException("Heap cheio!");
         }
+        tamanho++;
+        heap[tamanho] = elemento;
+        sobeHeap(tamanho);
+    }
 
-        Comparable<T> elementoOrdenavel = (Comparable<T>) elemento;
+    @SuppressWarnings("unchecked")
+    public T desenfileirar() {
+        if (estaVazio()) {
+            throw new IllegalStateException("Heap vazio!");
+        }
+        T raiz = (T) heap[1];
+        heap[1] = heap[tamanho];
+        heap[tamanho] = null;
+        tamanho--;
+        
+        if (!estaVazio()) {
+            desceHeap(1);
+        }
+        return raiz;
+    }
 
-        int posicao;
-        for (posicao = 0; posicao < tamanho(); posicao++) {
-            if (elementoOrdenavel.compareTo(elementos[posicao]) < 0) {
+    @SuppressWarnings("unchecked")
+    public T espiar() {
+        if (estaVazio()) {
+            throw new IllegalStateException("Heap vazio!");
+        }
+        return (T) heap[1];
+    }
+
+    public boolean estaVazio() {
+        return tamanho == 0;
+    }
+
+    public int getTamanho() {
+        return tamanho;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void sobeHeap(int i) {
+        while (i > 1) {
+            int pai = i / 2;
+            T atual = (T) heap[i];
+            T elementoPai = (T) heap[pai];
+            
+            if (atual.compareTo(elementoPai) > 0) {
+                trocar(i, pai);
+                i = pai;
+            } else {
                 break;
             }
         }
-
-        adicionaPosicao(posicao, elemento);
     }
 
-    public void adicionaPosicao(int posicao, T elemento) {
-		if (posicao < 0 || posicao > tamanho) {
-			throw new IllegalArgumentException("Posição inválida");
-		}
+    @SuppressWarnings("unchecked")
+    private void desceHeap(int i) {
+        while (2 * i <= tamanho) {
+            int filhoEsq = 2 * i;
+            int filhoDir = filhoEsq + 1;
+            int maiorFilho = filhoEsq;
 
-        // Mover todos os elementos
-		for (int i = tamanho - 1; i >= posicao; i--) {
-			elementos[i+1] = elementos[i];
-		}
+            T esq = (T) heap[filhoEsq];
+            T atual = (T) heap[i];
 
-		elementos[posicao] = elemento;
-		tamanho++;
-	}
+            if (filhoDir <= tamanho) {
+                T dir = (T) heap[filhoDir];
+                if (dir.compareTo(esq) > 0) {
+                    maiorFilho = filhoDir;
+                }
+            }
 
+            T itemMaiorFilho = (T) heap[maiorFilho];
+            if (itemMaiorFilho.compareTo(atual) > 0) {
+                trocar(i, maiorFilho);
+                i = maiorFilho;
+            } else {
+                break;
+            }
+        }
+    }
+
+    private void trocar(int a, int b) {
+        Object temp = heap[a];
+        heap[a] = heap[b];
+        heap[b] = temp;
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < tamanho; i++) {
-            sb.append(elementos[i]);
-            if (i < tamanho - 1) {
+        if (estaVazio()) {
+            return "Heap: []";
+        }
+        StringBuilder sb = new StringBuilder("Heap: [");
+        for (int i = 1; i <= tamanho; i++) {
+            sb.append(((T) heap[i]).toString());
+            if (i < tamanho) {
                 sb.append(", ");
             }
         }
