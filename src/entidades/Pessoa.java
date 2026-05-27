@@ -1,4 +1,4 @@
-package hospital;
+package entidades;
 
 public class Paciente implements Comparable<Paciente> {
 
